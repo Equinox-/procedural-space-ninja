@@ -38,7 +38,7 @@ void main() {
 
 	float quadHitFreq = 10;
 
-	for (scaling = 5; scaling <= maxAsteroidScale; scaling += 5) {
+	for (scaling = 5*1000; scaling <= maxAsteroidScale; scaling += 5) {
 		for (i = -span; i <= span; i++) {
 			for (j = -span; j <= span; j++) {
 				vec2 quadHit = (round(texCoord * scaling) + vec2(i, j))

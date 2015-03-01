@@ -11,7 +11,7 @@ uniform vec3 eye;
 out vec3 gnormal;
 
 bool doesClip(int i) {
-	return dot(normal[i], normalize(eye - position[i])) < -.1;
+	return false && dot(normal[i], normalize(eye - position[i])) < -.1;
 }
 
 void main()

@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import com.pi.core.wind.GLWindow;
 import com.pi.math.matrix.Matrix4;
 import com.pi.math.vector.VectorND;
+import com.pi.spaaace.astr.Asteroid;
 import com.pi.user.camera.Camera;
 import com.pi.user.camera.Camera3rdPerson;
 
@@ -27,14 +28,14 @@ public class SpaceMain extends GLWindow {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 
 		asteroids = new ArrayList<>();
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 1; i++) {
 			final float scalerand = .5f;
-			float posrand = 50;
-			float speedRand = 50;
+			float posrand =0* 50;
+			float speedRand = 0*50;
 			final float scaleRand2 = 5 * (float) Math.pow(Math.random(), 2);
 			Asteroid tmp = null;
 			prim: for (int t = 0; t < 25; t++) {
-				tmp = new Asteroid(new VectorND(posrand
+				tmp = new Asteroid(this, new VectorND(posrand
 						* (float) (Math.random() - .5), posrand
 						* (float) (Math.random() - .5), posrand
 						* (float) (Math.random() - .5)), new VectorND(
@@ -61,7 +62,7 @@ public class SpaceMain extends GLWindow {
 			System.out.println("Generated " + i);
 		}
 
-		cam = new Camera3rdPerson(this, 5).rates(2, 2, 50);
+		cam = new Camera3rdPerson(this, 5).rates(2, 2, 5);
 	}
 
 	@Override

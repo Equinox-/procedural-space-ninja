@@ -1,4 +1,4 @@
-package com.pi.spaaace;
+package com.pi.spaaace.astr;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import com.pi.core.vertex.VertexTypes.Vertex3D;
 import com.pi.math.matrix.Matrix4;
 import com.pi.math.vector.Vector;
 import com.pi.math.vector.VectorND;
+import com.pi.spaaace.SpaceMain;
 
 public class Asteroid {
 	private static final int AS_X = 1024, AS_Y = 1024;
@@ -48,6 +49,8 @@ public class Asteroid {
 
 	private Vector root, spin, scale;
 	private float angMomen;
+
+	private final SpaceMain main;
 
 	private static InputStream csr(String s) {
 		return SpaceMain.class.getResourceAsStream(s);
@@ -208,8 +211,9 @@ public class Asteroid {
 		}
 	}
 
-	public Asteroid(Vector root, Vector spin, Vector scale) {
+	public Asteroid(SpaceMain main, Vector root, Vector spin, Vector scale) {
 		prepare();
+		this.main = main;
 		this.root = root;
 		this.scale = scale;
 
@@ -241,7 +245,8 @@ public class Asteroid {
 		noiseGen.uniform("frequencyMult").scalar(frequencyMult);
 		noiseGen.uniform("baseScale").scalar(baseScale);
 		noiseGen.uniform("baseFrequency").scalar(baseFrequency);
-		noiseGen.uniform("seed").vector(root);
+		noiseGen.uniform("seed").vector(
+				root.clone().add(new VectorND(1823, 2831, 9342)));
 		noiseGen.uniform("sampleRadius").scalar(
 				noiseParams.get(0) + noiseParams.get(1));
 		noiseGen.uniform("maxAsteroidScale").scalar(
@@ -271,7 +276,7 @@ public class Asteroid {
 	public void render(Matrix4 project, Vector eye) {
 		float dist = Math.max(0, (float) Math.pow(
 				eye.dist(root) / (2 + Math.sqrt(maxRadius())), .3) - 1);
-		float lod = (.95f - Math.min(.95f, dist / 3.5f)) * (SOFTWARE_LOD + 1);
+		float lod = (.95f - Math.min(.95f, dist / 2.5f)) * (SOFTWARE_LOD + 1);
 		int softwareLOD = Math.min(SOFTWARE_LOD - 1, (int) lod);
 
 		ShaderProgram render = wireframe ? asteroidRenderWireframe
@@ -280,16 +285,13 @@ public class Asteroid {
 		render.bind();
 		render.uniform("data").texture(noise.getResult());
 		render.uniform("noiseParams").vector(noiseParams);
-		float lodPartial = (lod - softwareLOD) * 2;
-		/*
-		 * + Math.max(1, (float) Math.sqrt(maxRadius())); System.out.println(Math.max(1, (float) Math.sqrt(maxRadius())));
-		 */
-		if (lod > SOFTWARE_LOD -1)
-			lodPartial *= 3;
+		float lodPartial = 1f;// (lod - softwareLOD) * 2;
 		render.uniform("lodBias").scalar(lodPartial);
 
 		render.uniform("modelMatrix").matrix(model);
 		render.uniform("normalMatrix").matrix(normal);
+		render.uniform("screenSize").vector(main.getEvents().getWidth(),
+				main.getEvents().getHeight());
 		model.multiplyInto(project);
 		render.uniform("PCM").matrix(model);
 		render.uniform("eye").vector(eye);
@@ -298,14 +300,9 @@ public class Asteroid {
 		icosahedron.render(softwareLOD);
 
 		model.setScale(scale);
-		model.makeIdentity();
-
 		normal.makeIdentity();
 		normal.setAxisAngle((float) GLFW.glfwGetTime() * angMomen / maxRadius()
 				/ maxRadius(), spin);
-		for (int i = 0; i < 3; i++)
-			for (int q = 0; q < 12; q += 4)
-				model.put(i + q, model.get(i + q) * scale.get(i));
 		normal.setTranslation(root);
 		model.multiplyInto(normal);
 
