@@ -24,7 +24,7 @@ import com.pi.core.vertex.VertexTypes.Vertex3D;
 import com.pi.math.matrix.Matrix4;
 import com.pi.math.vector.Vector;
 import com.pi.math.vector.VectorND;
-import com.pi.spaaace.SpaceMain;
+import com.pi.spaaace.AsteroidTest;
 
 public class Asteroid {
 	private static final int AS_X = 1024, AS_Y = 1024;
@@ -50,10 +50,10 @@ public class Asteroid {
 	private Vector root, spin, scale;
 	private float angMomen;
 
-	private final SpaceMain main;
+	private final AsteroidTest main;
 
 	private static InputStream csr(String s) {
-		return SpaceMain.class.getResourceAsStream(s);
+		return AsteroidTest.class.getResourceAsStream(s);
 	}
 
 	private static int subAddr(List<Vector> pts, Map<String, Integer> assoc,
@@ -211,7 +211,7 @@ public class Asteroid {
 		}
 	}
 
-	public Asteroid(SpaceMain main, Vector root, Vector spin, Vector scale) {
+	public Asteroid(AsteroidTest main, Vector root, Vector spin, Vector scale) {
 		prepare();
 		this.main = main;
 		this.root = root;

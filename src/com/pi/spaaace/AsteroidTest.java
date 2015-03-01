@@ -13,7 +13,7 @@ import com.pi.spaaace.astr.Asteroid;
 import com.pi.user.camera.Camera;
 import com.pi.user.camera.Camera3rdPerson;
 
-public class SpaceMain extends GLWindow {
+public class AsteroidTest extends GLWindow {
 	private Camera cam;
 	private Matrix4 project = Matrix4.identity();
 
@@ -106,6 +106,6 @@ public class SpaceMain extends GLWindow {
 	}
 
 	public static void main(String[] args) {
-		new SpaceMain().start();
+		new AsteroidTest().start();
 	}
 }
