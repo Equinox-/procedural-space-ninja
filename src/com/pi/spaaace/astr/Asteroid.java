@@ -53,7 +53,7 @@ public class Asteroid {
 	private final AsteroidTest main;
 
 	private static InputStream csr(String s) {
-		return AsteroidTest.class.getResourceAsStream(s);
+		return Asteroid.class.getResourceAsStream(s);
 	}
 
 	private static int subAddr(List<Vector> pts, Map<String, Integer> assoc,
@@ -222,6 +222,12 @@ public class Asteroid {
 
 		this.noiseParams = new VectorND(2f + (float) Math.random() * 5,
 				(.15f + (float) Math.random() * .25f) * .1f);
+
+		System.out.println("Asteroid Params: ");
+		System.out.println("\troot = " + root);
+		System.out.println("\tspin = " + spin);
+		System.out.println("\tscale = " + scale);
+		System.out.println("\tnoiseP = " + noiseParams);
 	}
 
 	public void generate() {
@@ -234,23 +240,22 @@ public class Asteroid {
 		noise.gpuAlloc();
 
 		noiseGen.bind();
-		int octaves = 6;
+		int octaves = 1;
 		float scaleMult = .25f;
 		float frequencyMult = 2f;
-		float baseScale = noiseParams.get(0) * 5f + 100;
-		float baseFrequency = noiseParams.get(0) / 100;
+		float baseScale = noiseParams.get(0) * 2.5f + 50;
+		float baseFrequency = noiseParams.get(0) / 50;
 
 		noiseGen.uniform("octaves").scalar(octaves);
 		noiseGen.uniform("scaleMult").scalar(scaleMult);
 		noiseGen.uniform("frequencyMult").scalar(frequencyMult);
 		noiseGen.uniform("baseScale").scalar(baseScale);
 		noiseGen.uniform("baseFrequency").scalar(baseFrequency);
-		noiseGen.uniform("seed").vector(
-				root.clone().add(new VectorND(1823, 2831, 9342)));
+		noiseGen.uniform("seed").vector(root);
 		noiseGen.uniform("sampleRadius").scalar(
 				noiseParams.get(0) + noiseParams.get(1));
 		noiseGen.uniform("maxAsteroidScale").scalar(
-				15f * (float) Math.sqrt(maxRadius()));
+				Math.min(35, (float) Math.pow(maxRadius(), .25)) * 25);
 		noiseTmp.render(noiseGen);
 
 		normals.bind();
@@ -276,6 +281,7 @@ public class Asteroid {
 	public void render(Matrix4 project, Vector eye) {
 		float dist = Math.max(0, (float) Math.pow(
 				eye.dist(root) / (2 + Math.sqrt(maxRadius())), .3) - 1);
+		dist = 1e9f;
 		float lod = (.95f - Math.min(.95f, dist / 2.5f)) * (SOFTWARE_LOD + 1);
 		int softwareLOD = Math.min(SOFTWARE_LOD - 1, (int) lod);
 
@@ -285,8 +291,7 @@ public class Asteroid {
 		render.bind();
 		render.uniform("data").texture(noise.getResult());
 		render.uniform("noiseParams").vector(noiseParams);
-		float lodPartial = 1f;// (lod - softwareLOD) * 2;
-		render.uniform("lodBias").scalar(lodPartial);
+		render.uniform("lodBias").scalar(0);
 
 		render.uniform("modelMatrix").matrix(model);
 		render.uniform("normalMatrix").matrix(normal);

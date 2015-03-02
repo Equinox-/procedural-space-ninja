@@ -38,21 +38,26 @@ void main() {
 
 	float quadHitFreq = 10;
 
-	for (scaling = 5*1000; scaling <= maxAsteroidScale; scaling += 5) {
+	for (scaling = 5; scaling <= maxAsteroidScale; scaling += 5) {
 		for (i = -span; i <= span; i++) {
 			for (j = -span; j <= span; j++) {
 				vec2 quadHit = (round(texCoord * scaling) + vec2(i, j))
 						/ scaling;
+				if (quadHit.y > 1 || quadHit.y < 0)
+					continue;
+				float scalingVary = pow(1 - min(1, 2 * abs(quadHit.y - .5)),
+						.25);
+				quadHit = (round(texCoord * scaling * vec2(scalingVary, 1))
+						+ vec2(i, j)) / (scaling * vec2(scalingVary, 1));
+				if (quadHit.y > 1 || quadHit.y < 0)
+					continue;
 				vec3 vevHit = posAtRaw(quadHit, sampleRadius);
 				quadHit += vec2(snoise(seed + vevHit.xyz * quadHitFreq),
 						snoise(seed + vevHit.yxz * quadHitFreq)) / scaling;
 				vevHit = posAtRaw(quadHit, sampleRadius);
-				float actCosine = cos(
-						min(.5, abs(quadHit.y - .5)) * 2);
 				vec3 mag = vevHit - pos;
 				float dist = length(mag);
-				float basis = abs(actCosine)
-						* (snoise(seed + .01 * vevHit) * .25 + 2.5);
+				float basis = (snoise(seed + .01 * vevHit) * .25 + 2.5);
 
 				if (basis > 1 && dist <= basis / scaling) {
 					float val = pow(scaling * dist / basis, 2);

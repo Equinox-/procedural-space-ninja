@@ -28,10 +28,10 @@ public class AsteroidTest extends GLWindow {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 
 		asteroids = new ArrayList<>();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 			final float scalerand = .5f;
-			float posrand =0* 50;
-			float speedRand = 0*50;
+			float posrand = 50;
+			float speedRand = 50;
 			final float scaleRand2 = 5 * (float) Math.pow(Math.random(), 2);
 			Asteroid tmp = null;
 			prim: for (int t = 0; t < 25; t++) {

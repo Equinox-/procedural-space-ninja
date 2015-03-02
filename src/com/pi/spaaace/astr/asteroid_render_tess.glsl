@@ -19,6 +19,7 @@ uniform mat4 modelMatrix;
 uniform mat4 PCM;
 
 #define NDC_EDGE (1.3)
+#define FACE_AWAY_TOL (-.25)
 
 vec4 sampleAt(vec3 dir) {
 	vec2 gridTex = vec2((atan(dir.y, dir.x) + M_PI) / (2 * M_PI),
@@ -39,7 +40,7 @@ bool ndcOffScreen(vec4 ndc) {
 
 bool facesAway(vec3 model, vec3 norm) {
 	return dot(eye - (modelMatrix * vec4(model, 1)).xyz,
-			(normalMatrix * vec4(norm, 1)).xyz) < 0;
+			(normalMatrix * vec4(norm, 1)).xyz) < FACE_AWAY_TOL;
 }
 
 vec2 ndcToScreen(vec4 ndc) {
@@ -47,7 +48,7 @@ vec2 ndcToScreen(vec4 ndc) {
 }
 
 float level(vec2 v0, vec3 n0, vec2 v1, vec3 n1) {
-	return clamp((distance(v0, v1) - dot(n0, n1)) / (5 + 0 * lodBias), 1, 64);
+	return clamp(lodBias * (distance(v0, v1) - dot(n0, n1)) / 5, 1, 64);
 }
 
 void main() {
@@ -143,11 +144,12 @@ void main() {
 	gridTex.x = mod(gridTex.x + 10, 1);
 	vec2 effGrid = abs(
 			vec2(cos(gridTex.x * M_PI) * cos((gridTex.y - .5) * M_PI),
-					gridTex.y));
+					gridTex.y)) * 5;
 
-	textureCoord = vec2(sin(5 * effGrid.x + turbulence(dir)),
-			cos(5 * effGrid.y + turbulence(dir)));
-	radius += texture2D(bump, textureCoord).w / 25;
+	textureCoord = vec2(sin(effGrid.x + turbulence(dir)),
+			cos(effGrid.y + turbulence(dir))) * radius;
+
+	radius += texture2D(bump, textureCoord).w / 100;
 
 	vec4 realPos = vec4(dir * radius, 1);
 	position = (modelMatrix * realPos).xyz;
